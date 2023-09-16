@@ -33,7 +33,7 @@ int A::IdExp::MaxArgs() const {
 
 }
 
-IntAndTable A::IdExp::Interp(Table *t) const {
+IntAndTable *A::IdExp::Interp(Table *t) const {
 
 }
 //NumExp
@@ -41,7 +41,7 @@ int A::NumExp::MaxArgs() const {
 
 }
 
-IntAndTable A::NumExp::Interp(Table *t) const {
+IntAndTable *A::NumExp::Interp(Table *t) const {
 
 }
 //OpExp
@@ -49,7 +49,7 @@ int A::OpExp::MaxArgs() const {
 
 }
 
-IntAndTable A::OpExp::Interp(Table *t) const {
+IntAndTable *A::OpExp::Interp(Table *t) const {
 
 }
 //EseqExp
@@ -57,7 +57,7 @@ int A::EseqExp::MaxArgs() const {
 
 }
 
-IntAndTable A::EseqExp::Interp(Table *t) const {
+IntAndTable *A::EseqExp::Interp(Table *t) const {
 
 }
 
@@ -71,7 +71,7 @@ int A::PairExpList::NumExps() const {
 
 }
 
-IntAndTable A::PairExpList::Interp(Table *t) const {
+IntAndTable *A::PairExpList::Interp(Table *t) const {
 
 }
 //LastExpList
@@ -83,7 +83,7 @@ int A::LastExpList::NumExps() const {
 
 }
 
-IntAndTable A::LastExpList::Interp(Table *t) const {
+IntAndTable *A::LastExpList::Interp(Table *t) const {
 
 }
 
