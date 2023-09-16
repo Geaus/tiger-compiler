@@ -115,6 +115,8 @@ int A::PairExpList::NumExps() const {
 
 IntAndTable *A::PairExpList::Interp(Table *t) const {
   IntAndTable *tmp =this->exp->Interp(t);
+  int result = tmp->i;
+  printf("%d",result);
   return this->tail->Interp(tmp->t);
 }
 // LastExpList
@@ -126,6 +128,8 @@ int A::LastExpList::NumExps() const {
 
 IntAndTable *A::LastExpList::Interp(Table *t) const {
   IntAndTable *tmp=this->exp->Interp(t);
+  int result = tmp->i;
+  printf("%d",result);
   return tmp;
 }
 
