@@ -5,6 +5,9 @@
 namespace A {
 int A::CompoundStm::MaxArgs() const {
   // TODO: put your code here (lab1).
+  int a = stm1->MaxArgs();
+  int b = stm2->MaxArgs();
+  return a > b ? a : b;
 }
 
 Table *A::CompoundStm::Interp(Table *t) const {
@@ -13,6 +16,7 @@ Table *A::CompoundStm::Interp(Table *t) const {
 
 int A::AssignStm::MaxArgs() const {
   // TODO: put your code here (lab1).
+  return exp->MaxArgs();
 }
 
 Table *A::AssignStm::Interp(Table *t) const {
@@ -27,65 +31,49 @@ Table *A::PrintStm::Interp(Table *t) const {
   // TODO: put your code here (lab1).
 }
 
-//Exp function
-//IdExp
-int A::IdExp::MaxArgs() const {
+// Exp function
+// IdExp
+int A::IdExp::MaxArgs() const { return 1; }
 
-}
+IntAndTable *A::IdExp::Interp(Table *t) const {}
+// NumExp
+int A::NumExp::MaxArgs() const { return 1; }
 
-IntAndTable *A::IdExp::Interp(Table *t) const {
-
-}
-//NumExp
-int A::NumExp::MaxArgs() const {
-
-}
-
-IntAndTable *A::NumExp::Interp(Table *t) const {
-
-}
-//OpExp
+IntAndTable *A::NumExp::Interp(Table *t) const {}
+// OpExp
 int A::OpExp::MaxArgs() const {
-
+  int a = left->MaxArgs();
+  int b = right->MaxArgs();
+  return a > b ? a : b;
 }
 
-IntAndTable *A::OpExp::Interp(Table *t) const {
-
-}
-//EseqExp
+IntAndTable *A::OpExp::Interp(Table *t) const {}
+// EseqExp
 int A::EseqExp::MaxArgs() const {
-
+  int a = stm->MaxArgs();
+  int b = exp->MaxArgs();
+  return a > b ? a : b;
 }
 
-IntAndTable *A::EseqExp::Interp(Table *t) const {
+IntAndTable *A::EseqExp::Interp(Table *t) const {}
 
-}
-
-//ExpList function
-//PairExpList
+// ExpList function
+// PairExpList
 int A::PairExpList::MaxArgs() const {
-
+  int a = exp->MaxArgs();
+  int b = tail->MaxArgs();
+  return a > b ? a : b;
 }
 
-int A::PairExpList::NumExps() const {
+int A::PairExpList::NumExps() const {}
 
-}
+IntAndTable *A::PairExpList::Interp(Table *t) const {}
+// LastExpList
+int A::LastExpList::MaxArgs() const { return exp->MaxArgs(); }
 
-IntAndTable *A::PairExpList::Interp(Table *t) const {
+int A::LastExpList::NumExps() const {}
 
-}
-//LastExpList
-int A::LastExpList::MaxArgs() const {
-
-}
-
-int A::LastExpList::NumExps() const {
-
-}
-
-IntAndTable *A::LastExpList::Interp(Table *t) const {
-
-}
+IntAndTable *A::LastExpList::Interp(Table *t) const {}
 
 int Table::Lookup(const std::string &key) const {
   if (id == key) {
@@ -100,4 +88,4 @@ int Table::Lookup(const std::string &key) const {
 Table *Table::Update(const std::string &key, int val) const {
   return new Table(key, val, this);
 }
-}  // namespace A
+} // namespace A
