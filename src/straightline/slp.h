@@ -59,6 +59,7 @@ class Exp {
   // TODO: you'll have to add some definitions here (lab1).
   // Hints: You may add interfaces like `int MaxArgs()`,
   //        and ` IntAndTable *Interp(Table *)`
+ public:
   virtual int MaxArgs() const = 0;
   virtual IntAndTable *Interp(Table *) const = 0;
 };

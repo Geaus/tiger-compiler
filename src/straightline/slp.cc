@@ -25,7 +25,7 @@ Table *A::AssignStm::Interp(Table *t) const {
   // TODO: put your code here (lab1).
   IntAndTable * tmp=this->exp->Interp(t);
   Table * table=tmp->t;
-  table = table->Update(this.id,tmp->i);
+  table = table->Update(this->id,tmp->i);
   return table;
 
 }
@@ -46,7 +46,7 @@ Table *A::PrintStm::Interp(Table *t) const {
 int A::IdExp::MaxArgs() const { return 1; }
 
 IntAndTable *A::IdExp::Interp(Table *t) const {
-  int value = t->Lookup(this.id);
+  int value = t->Lookup(this->id);
   IntAndTable * tmp=new IntAndTable(value,t);
   return tmp;
 }
@@ -54,7 +54,7 @@ IntAndTable *A::IdExp::Interp(Table *t) const {
 int A::NumExp::MaxArgs() const { return 1; }
 
 IntAndTable *A::NumExp::Interp(Table *t) const {
-  IntAndTable * tmp=new IntAndTable(this.num,t);
+  IntAndTable * tmp=new IntAndTable(this->num,t);
   return tmp;
 }
 // OpExp
