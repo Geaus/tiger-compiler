@@ -129,7 +129,7 @@ int A::LastExpList::NumExps() const {
 IntAndTable *A::LastExpList::Interp(Table *t) const {
   IntAndTable *tmp=this->exp->Interp(t);
   int result = tmp->i;
-  printf("%d",result);
+  printf("%d\n",result);
   return tmp;
 }
 
