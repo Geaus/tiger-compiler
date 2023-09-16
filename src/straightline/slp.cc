@@ -37,7 +37,7 @@ int A::PrintStm::MaxArgs() const {
 
 Table *A::PrintStm::Interp(Table *t) const {
   // TODO: put your code here (lab1).
-  IntAndTable * tmp=this->exp->Interp(t);
+  IntAndTable * tmp=this->exps->Interp(t);
   return tmp->t;
 }
 
