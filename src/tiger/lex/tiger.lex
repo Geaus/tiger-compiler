@@ -61,11 +61,7 @@
   *   Parser::TYPE
   */
 
-/*  ID  INT  STRING   */
-[a-zA-Z][_a-zA-Z0-9]* {adjust();return Parser::ID}
-[0-9]+                {adjust();return Parser::INT}
-
-/*     */
+/*  punctuation   */
 ","                   {adjust();return Parser::COMMA}
 ":"                   {adjust();return Parser::COLON}
 ";"                   {adjust();return Parser::SEMICOLON}
@@ -92,8 +88,28 @@
 
 /* reserved words */
 /* TODO: Put your lab2 code here */
-"array"              {adjust(); return Parser::ARRAY;}
-"if"                 {adjust(); return Parser::IF;}
+"array"               {adjust(); return Parser::ARRAY;}
+"if"                  {adjust(); return Parser::IF;}
+"then"                {adjust(); return Parser::THEN;}
+"else"                {adjust(); return Parser::ELSE;}
+"while"               {adjust(); return Parser::WHILE;}
+"for"                 {adjust(); return Parser::FOR;}
+"to"                  {adjust(); return Parser::TO;}
+"do"                  {adjust(); return Parser::DO;}
+"let"                 {adjust(); return Parser::LET;}
+"in"                  {adjust(); return Parser::IN;}
+"end"                 {adjust(); return Parser::END;}
+"of"                  {adjust(); return Parser::OF;}
+"break"               {adjust(); return Parser::BREAK;}
+"nil"                 {adjust(); return Parser::NIL;}
+"function"            {adjust(); return Parser::FUNCTION;}
+"var"                 {adjust(); return Parser::VAR;}
+"type"                {adjust(); return Parser::TYPE;}
+
+
+/*  ID  INT  STRING   */
+[a-zA-Z][_a-zA-Z0-9]* {adjust();return Parser::ID}
+[0-9]+                {adjust();return Parser::INT}
 
 
 
