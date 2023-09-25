@@ -61,9 +61,41 @@
   *   Parser::TYPE
   */
 
- /* reserved words */
-"array" {adjust(); return Parser::ARRAY;}
- /* TODO: Put your lab2 code here */
+/*  ID  INT  STRING   */
+[a-zA-Z][_a-zA-Z0-9]* {adjust();return Parser::ID}
+[0-9]+                {adjust();return Parser::INT}
+
+/*     */
+","                   {adjust();return Parser::COMMA}
+":"                   {adjust();return Parser::COLON}
+";"                   {adjust();return Parser::SEMICOLON}
+"("                   {adjust();return Parser::LPAREN}
+")"                   {adjust();return Parser::RPAREN}
+"{"                   {adjust();return Parser::LBRACK}
+"}"                   {adjust();return Parser::LBRACK}
+"["                   {adjust();return Parser::LBRACE}
+"]"                   {adjust();return Parser::RBRACE}
+"."                   {adjust();return Parser::DOT}
+"+"                   {adjust();return Parser::PLUS}
+"-"                   {adjust();return Parser::MINUS}
+"*"                   {adjust();return Parser::TIMES}
+"/"                   {adjust();return Parser::DIVIDE}
+"="                   {adjust();return Parser::EQ}
+"<>"                  {adjust();return Parser::NEQ}
+"<"                   {adjust();return Parser::LT}
+"<="                  {adjust();return Parser::LE}
+">"                   {adjust();return Parser::GT}
+">="                  {adjust();return Parser::GE}
+"&"                   {adjust();return Parser::AND}
+"|"                   {adjust();return Parser::OR}
+":="                  {adjust();return Parser::ASSIGN}
+
+/* reserved words */
+/* TODO: Put your lab2 code here */
+"array"              {adjust(); return Parser::ARRAY;}
+"if"                 {adjust(); return Parser::IF;}
+
+
 
  /*
   * skip white space chars.
