@@ -61,7 +61,7 @@
   *   Parser::TYPE
   */
 
-/*  punctuation   */
+/*  punctuation  symbol  */
 ","                   {adjust();return Parser::COMMA}
 ":"                   {adjust();return Parser::COLON}
 ";"                   {adjust();return Parser::SEMICOLON}
@@ -113,14 +113,58 @@
 
 /*  STRING  */
 \"                    {adjust(); string_buf_.clean();begin(StartCondition__::STR);}
+
 <STR>{
+
+  \\n        {
+                    adjustStr();
+                    string_buf_+='\n';
+            }
+
+  \\t        {
+                  adjustStr();
+                  string_buf_+='\t';
+            }
+
+  \\\"       {
+                  adjustStr();
+                  string_buf_+='\"';
+            }
+  \\\\       {
+                  adjustStr();
+                  string_buf_+='\\';
+            }
+
+  \\\^[A-Z]  {
+                  adjustStr();
+                  string_buf_+=matched()[2]-'A'+1;
+            }
+
+  \\[0-9][0-9][0-9]   {
+                  adjustStr();
+                  std::string str=matched();
+                  string_buf_+=char((str[3]-'0')+(str[2]-'0')*10+(str[1]-'0')*100);
+
+            }
+  \\[ \n\t\f]+\\  {adjustStr(); }            
+  .           {
+                  adjustStr(); 
+                  string_buf_ += matched(); 
+              }
+
+  \"          {   adjustStr();
+                  begin(StartCondition__::INITIAL);
+                  setMatched(string_buf_);
+                  return Parser::STRING;
+              }
 
 
 }
 
 /* COMMENT */
-"/*"                  {adjust(); comment_level_=0;begin(StartCondition__::COMMENT);}
+"/*"                  {adjust(); comment_level_++; begin(StartCondition__::COMMENT);}
 <COMMENT>{
+
   "/*"  {   adjustStr(); 
             comment_level_++;
         }
@@ -129,9 +173,10 @@
         }
   "*/"  {
             adjustStr(); 
-            if(comment_level_>0) comment_level_--;  
-            else begin(StartCondition__::INITIAL);
-            
+            comment_level_--;  
+            if(comment_level_==1){
+               begin(StartCondition__::INITIAL);
+            }
         }
 }
 
