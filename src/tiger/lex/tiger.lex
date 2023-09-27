@@ -67,10 +67,10 @@
 ";"                   {adjust();return Parser::SEMICOLON}
 "("                   {adjust();return Parser::LPAREN}
 ")"                   {adjust();return Parser::RPAREN}
-"{"                   {adjust();return Parser::LBRACK}
-"}"                   {adjust();return Parser::LBRACK}
-"["                   {adjust();return Parser::LBRACE}
-"]"                   {adjust();return Parser::RBRACE}
+"["                   {adjust();return Parser::LBRACK}
+"]"                   {adjust();return Parser::LBRACK}
+"{"                   {adjust();return Parser::LBRACE}
+"}"                   {adjust();return Parser::RBRACE}
 "."                   {adjust();return Parser::DOT}
 "+"                   {adjust();return Parser::PLUS}
 "-"                   {adjust();return Parser::MINUS}
@@ -107,9 +107,33 @@
 "type"                {adjust(); return Parser::TYPE;}
 
 
-/*  ID  INT  STRING   */
-[a-zA-Z][_a-zA-Z0-9]* {adjust();return Parser::ID}
-[0-9]+                {adjust();return Parser::INT}
+/*  ID  INT  */
+[a-zA-Z][_a-zA-Z0-9]* {adjust(); return Parser::ID}
+[0-9]+                {adjust(); return Parser::INT}
+
+/*  STRING  */
+\"                    {adjust(); string_buf_.clean();begin(StartCondition__::STR);}
+<STR>{
+
+
+}
+
+/* COMMENT */
+"/*"                  {adjust(); comment_level_=0;begin(StartCondition__::COMMENT);}
+<COMMENT>{
+  "/*"  {   adjustStr(); 
+            comment_level_++;
+        }
+  .|\n  { 
+            adjustStr();
+        }
+  "*/"  {
+            adjustStr(); 
+            if(comment_level_>0) comment_level_--;  
+            else begin(StartCondition__::INITIAL);
+            
+        }
+}
 
 
 
@@ -122,3 +146,5 @@
 
  /* illegal input */
 . {adjust(); errormsg_->Error(errormsg_->tok_pos_, "illegal token");}
+
+<<EOF>> return 0;
