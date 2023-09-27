@@ -62,29 +62,29 @@
   */
 
 /*  punctuation  symbol  */
-","                   {adjust();return Parser::COMMA}
-":"                   {adjust();return Parser::COLON}
-";"                   {adjust();return Parser::SEMICOLON}
-"("                   {adjust();return Parser::LPAREN}
-")"                   {adjust();return Parser::RPAREN}
-"["                   {adjust();return Parser::LBRACK}
-"]"                   {adjust();return Parser::LBRACK}
-"{"                   {adjust();return Parser::LBRACE}
-"}"                   {adjust();return Parser::RBRACE}
-"."                   {adjust();return Parser::DOT}
-"+"                   {adjust();return Parser::PLUS}
-"-"                   {adjust();return Parser::MINUS}
-"*"                   {adjust();return Parser::TIMES}
-"/"                   {adjust();return Parser::DIVIDE}
-"="                   {adjust();return Parser::EQ}
-"<>"                  {adjust();return Parser::NEQ}
-"<"                   {adjust();return Parser::LT}
-"<="                  {adjust();return Parser::LE}
-">"                   {adjust();return Parser::GT}
-">="                  {adjust();return Parser::GE}
-"&"                   {adjust();return Parser::AND}
-"|"                   {adjust();return Parser::OR}
-":="                  {adjust();return Parser::ASSIGN}
+","                   {adjust();return Parser::COMMA;}
+":"                   {adjust();return Parser::COLON;}
+";"                   {adjust();return Parser::SEMICOLON;}
+"("                   {adjust();return Parser::LPAREN;}
+")"                   {adjust();return Parser::RPAREN;}
+"["                   {adjust();return Parser::LBRACK;}
+"]"                   {adjust();return Parser::RBRACK;}
+"{"                   {adjust();return Parser::LBRACE;}
+"}"                   {adjust();return Parser::RBRACE;}
+"."                   {adjust();return Parser::DOT;}
+"+"                   {adjust();return Parser::PLUS;}
+"-"                   {adjust();return Parser::MINUS;}
+"*"                   {adjust();return Parser::TIMES;}
+"/"                   {adjust();return Parser::DIVIDE;}
+"="                   {adjust();return Parser::EQ;}
+"<>"                  {adjust();return Parser::NEQ;}
+"<"                   {adjust();return Parser::LT;}
+"<="                  {adjust();return Parser::LE;}
+">"                   {adjust();return Parser::GT;}
+">="                  {adjust();return Parser::GE;}
+"&"                   {adjust();return Parser::AND;}
+"|"                   {adjust();return Parser::OR;}
+":="                  {adjust();return Parser::ASSIGN;}
 
 /* reserved words */
 /* TODO: Put your lab2 code here */
@@ -108,28 +108,36 @@
 
 
 /*  ID  INT  */
-[a-zA-Z][_a-zA-Z0-9]* {adjust(); return Parser::ID}
-[0-9]+                {adjust(); return Parser::INT}
+[a-zA-Z][_a-zA-Z0-9]* {adjust(); return Parser::ID;}
+[0-9]+                {adjust(); return Parser::INT;}
 
 /*  STRING  */
-\"                    {adjust(); string_buf_.clean();begin(StartCondition__::STR);}
+\"                    {adjust(); string_buf_.clear();begin(StartCondition__::STR);}
 
 <STR>{
 
+  \"          {  
+                  adjustStr();
+                  begin(StartCondition__::INITIAL);
+                  setMatched(string_buf_);
+                  return Parser::STRING;
+              }
+
   \\n        {
-                    adjustStr();
-                    string_buf_+='\n';
-            }
+                  adjustStr();
+                  string_buf_+='\n';
+             }
 
   \\t        {
                   adjustStr();
                   string_buf_+='\t';
-            }
+             }
 
   \\\"       {
                   adjustStr();
                   string_buf_+='\"';
-            }
+             }
+
   \\\\       {
                   adjustStr();
                   string_buf_+='\\';
@@ -138,26 +146,22 @@
   \\\^[A-Z]  {
                   adjustStr();
                   string_buf_+=matched()[2]-'A'+1;
-            }
+             }
 
   \\[0-9][0-9][0-9]   {
                   adjustStr();
                   std::string str=matched();
                   string_buf_+=char((str[3]-'0')+(str[2]-'0')*10+(str[1]-'0')*100);
 
-            }
-  \\[ \n\t\f]+\\  {adjustStr(); }            
-  .           {
+             }
+  \\[ \n\t\f]+\\  {
+                  adjustStr(); 
+             }         
+
+  .          {
                   adjustStr(); 
                   string_buf_ += matched(); 
-              }
-
-  \"          {   adjustStr();
-                  begin(StartCondition__::INITIAL);
-                  setMatched(string_buf_);
-                  return Parser::STRING;
-              }
-
+            }
 
 }
 
@@ -181,7 +185,6 @@
 }
 
 
-
  /*
   * skip white space chars.
   * space, tabs and LF
@@ -192,4 +195,5 @@
  /* illegal input */
 . {adjust(); errormsg_->Error(errormsg_->tok_pos_, "illegal token");}
 
+/*   end  */
 <<EOF>> return 0;
