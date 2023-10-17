@@ -77,6 +77,8 @@ program:  exp  {absyn_tree_ = std::make_unique<absyn::AbsynTree>($1);};
    lvalue {$$ = new absyn::VarExp(scanner_.GetTokPos(), $1); } |
    
    MINUS exp %prec UMINUS {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::MINUS_OP,new absyn::IntExp(scanner_.GetTokPos(),0),$2);} |
+   exp AND exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::AND_OP, $1, $3);} |
+   exp OR exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::OR_OP, $1, $3);} |
    exp PLUS exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::PLUS_OP, $1, $3); } |
    exp MINUS exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::MINUS_OP, $1, $3);} |
    exp TIMES exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::TIMES_OP, $1, $3);} |
@@ -87,8 +89,6 @@ program:  exp  {absyn_tree_ = std::make_unique<absyn::AbsynTree>($1);};
    exp LE exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::LE_OP, $1, $3);} |
    exp GT exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::GT_OP, $1, $3);} |
    exp GE exp {$$ = new absyn::OpExp(scanner_.GetTokPos(),absyn::GE_OP, $1, $3);} |
-   exp AND exp {$$ = new absyn::IfExp(scanner_.GetTokPos(), $1, $3, new absyn::IntExp(scanner_.GetTokPos(), 0));} |
-   exp OR exp {$$ = new absyn::IfExp(scanner_.GetTokPos(), $1, new absyn::IntExp(scanner_.GetTokPos(), 1), $3);} |
 
    lvalue ASSIGN exp {$$ = new absyn::AssignExp(scanner_.GetTokPos(), $1, $3);} |
    ID LPAREN actuals RPAREN   {$$ = new absyn::CallExp(scanner_.GetTokPos(), $1, $3);} |
@@ -130,3 +130,4 @@ oneormore:
   one    {$$ = $1;} |
   oneormore DOT ID   {$$ = new absyn::FieldVar(scanner_.GetTokPos(), $1, $3);}  |
   oneormore LBRACK exp RBRACK  {$$ = new absyn::SubscriptVar(scanner_.GetTokPos(), $1, $3);};
+
