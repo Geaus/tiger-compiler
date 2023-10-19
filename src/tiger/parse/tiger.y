@@ -68,6 +68,8 @@
 program:  exp  {absyn_tree_ = std::make_unique<absyn::AbsynTree>($1);};
 
  /* TODO: Put your lab3 code here */
+
+ /*var section: simpleVar  FieldVar  SubscriptVar */
 lvalue:  
   ID  {$$=new absyn::SimpleVar(scanner_.GetTokPos(), $1);} |  
   oneormore  {$$=$1;};
@@ -81,23 +83,7 @@ oneormore:
   oneormore DOT ID   {$$=new absyn::FieldVar(scanner_.GetTokPos(), $1, $3);}  |
   oneormore LBRACK exp RBRACK  {$$=new absyn::SubscriptVar(scanner_.GetTokPos(), $1, $3);};
 
-vardec:  
-  VAR ID ASSIGN exp  {$$=new absyn::VarDec(scanner_.GetTokPos(), $2, nullptr, $4);} |
-  VAR ID COLON ID ASSIGN exp  {$$=new absyn::VarDec(scanner_.GetTokPos(), $2, $4, $6);};
-
-decs_nonempty_s: 
-  vardec  {$$=$1;} |
-  tydec   {$$=new absyn::TypeDec(scanner_.GetTokPos(), $1);} |
-  fundec  {$$=new absyn::FunctionDec(scanner_.GetTokPos(), $1);};
-
-decs_nonempty: 
-  decs_nonempty_s   {$$=new absyn::DecList($1);} |
-  decs_nonempty_s decs_nonempty   {$$=$2->Prepend($1);};
-
-decs:   
-  {$$ = new absyn::DecList();} |
-  decs_nonempty  {$$=$1;};
-
+/*record section */
 rec_one:  
   ID EQ exp   {$$=new absyn::EField($1, $3);};
 
@@ -109,6 +95,14 @@ rec:
   {$$=new absyn::EFieldList();} |  
   rec_nonempty   {$$=$1;};
 
+/*decl section: vardec typedec funcdec */
+
+//var dec
+vardec:  
+  VAR ID ASSIGN exp  {$$=new absyn::VarDec(scanner_.GetTokPos(), $2, nullptr, $4);} |
+  VAR ID COLON ID ASSIGN exp  {$$=new absyn::VarDec(scanner_.GetTokPos(), $2, $4, $6);};
+
+//type dec
 ty:
   ID  {$$=new absyn::NameTy(scanner_.GetTokPos(), $1);} |
   LBRACE tyfields RBRACE  {$$=new absyn::RecordTy(scanner_.GetTokPos(), $2);} |
@@ -121,6 +115,7 @@ tydec:
   tydec_one   {$$=new absyn::NameAndTyList($1);} |
   tydec_one tydec  {$$=$2->Prepend($1);};
 
+//function dec
 tyfield:
   ID COLON ID   {$$=new absyn::Field(scanner_.GetTokPos(), $1, $3);};
 
@@ -140,8 +135,21 @@ fundec:
   fundec_one  {$$=new absyn::FunDecList($1);} |
   fundec_one fundec  {$$=$2->Prepend($1);};
 
+/*dec list section*/
+decs_nonempty_s: 
+  vardec  {$$=$1;} |
+  tydec   {$$=new absyn::TypeDec(scanner_.GetTokPos(), $1);} |
+  fundec  {$$=new absyn::FunctionDec(scanner_.GetTokPos(), $1);};
 
+decs_nonempty: 
+  decs_nonempty_s   {$$=new absyn::DecList($1);} |
+  decs_nonempty_s decs_nonempty   {$$=$2->Prepend($1);};
 
+decs:   
+  {$$ = new absyn::DecList();} |
+  decs_nonempty  {$$=$1;};
+
+/*exp section: exp-seq  exp-list */
 expseq:
   exp    {$$=new absyn::SeqExp(scanner_.GetTokPos(), new absyn::ExpList($1));} |
   sequencing_exps    {$$=new absyn::SeqExp(scanner_.GetTokPos(), $1);};
@@ -149,9 +157,6 @@ expseq:
 sequencing_exps:
   exp SEMICOLON exp    {$$=(new absyn::ExpList($3))->Prepend($1);} |
   exp SEMICOLON sequencing_exps {$$=$3->Prepend($1);};
-
-sequencing:
-  LPAREN sequencing_exps RPAREN  {$$ = $2;};
 
 nonemptyactuals: 
   exp   {$$=new absyn::ExpList($1);} |
@@ -184,13 +189,22 @@ exp:
    MINUS exp %prec UMINUS {$$=new absyn::OpExp(scanner_.GetTokPos(),absyn::MINUS_OP,new absyn::IntExp(scanner_.GetTokPos(),0),$2);} |
    
    lvalue ASSIGN exp {$$=new absyn::AssignExp(scanner_.GetTokPos(), $1, $3);} |
+
    ID LPAREN actuals RPAREN   {$$=new absyn::CallExp(scanner_.GetTokPos(), $1, $3);} |
-   sequencing  {$$=new absyn::SeqExp(scanner_.GetTokPos(),$1);} | 
+
+   LPAREN sequencing_exps RPAREN  {$$=new absyn::SeqExp(scanner_.GetTokPos(),$2);} | 
+
    ID LBRACE rec RBRACE   {$$=new absyn::RecordExp(scanner_.GetTokPos(), $1, $3);} |
+
    ID LBRACK exp RBRACK OF exp   {$$=new absyn::ArrayExp(scanner_.GetTokPos(), $1, $3, $6);} |
+
    IF exp THEN exp  {$$=new absyn::IfExp(scanner_.GetTokPos(), $2, $4, nullptr);} |
    IF exp THEN exp ELSE exp  {$$=new absyn::IfExp(scanner_.GetTokPos(), $2, $4, $6);} |
+
    WHILE exp DO exp    {$$=new absyn::WhileExp(scanner_.GetTokPos(), $2, $4);} |
+
    FOR ID ASSIGN exp TO exp DO exp  {$$=new absyn::ForExp(scanner_.GetTokPos(), $2, $4, $6, $8);} |
+
    BREAK   {$$=new absyn::BreakExp(scanner_.GetTokPos());} |
+
    LET decs IN expseq END   {$$=new absyn::LetExp(scanner_.GetTokPos(), $2, $4);};
