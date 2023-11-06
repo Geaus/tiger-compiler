@@ -239,11 +239,12 @@ type::Ty *IfExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
     errormsg->Error(test_->pos_, "if test must be Integer");
     return type::VoidTy::Instance();
   }
-  if (elsee_==nullptr && typeid(*then_ty) != typeid(type::VoidTy)) {
-    
-    errormsg->Error(then_->pos_, "if-then exp's body must produce no value");
-    return type::VoidTy::Instance();
-    
+  if (elsee_==nullptr) {
+
+    if(typeid(*then_ty) != typeid(type::VoidTy)){
+      errormsg->Error(then_->pos_, "if-then exp's body must produce no value");
+      return type::VoidTy::Instance();
+    }
   }
   else {
     type::Ty *else_ty = elsee_->SemAnalyze(venv, tenv, labelcount, errormsg);
