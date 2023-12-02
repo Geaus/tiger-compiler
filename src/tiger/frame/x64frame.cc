@@ -34,7 +34,7 @@ class X64Frame : public Frame {
 
 temp::TempList *X64RegManager::Registers() {
   auto tmp_list = new temp::TempList();
-  for(int i = 1; i < 16; i++){
+  for(int i = 0; i < 15; i++){
     tmp_list->Append(GetRegister(i));
   }
   return tmp_list;
@@ -43,7 +43,7 @@ temp::TempList *X64RegManager::Registers() {
 
 temp::TempList *X64RegManager::ArgRegs() {
   auto tmp_list = new temp::TempList();
-  for(int i = 2; i < 8; i++){
+  for(int i = 1; i < 7; i++){
     tmp_list->Append(GetRegister(i));
   }
   return tmp_list;
@@ -52,7 +52,7 @@ temp::TempList *X64RegManager::ArgRegs() {
 
 temp::TempList *X64RegManager::CallerSaves() {
   auto tmp_list = new temp::TempList();
-  for(int i = 1; i < 10; i++){
+  for(int i = 0; i < 9; i++){
     tmp_list->Append(GetRegister(i));
   }
   return tmp_list;
@@ -61,7 +61,7 @@ temp::TempList *X64RegManager::CallerSaves() {
 
 temp::TempList *X64RegManager::CalleeSaves() {
   auto tmp_list = new temp::TempList();
-  for(int i = 10; i < 16; i++){
+  for(int i = 9; i < 15; i++){
     tmp_list->Append(GetRegister(i));
   }
   return tmp_list;
@@ -84,17 +84,17 @@ int X64RegManager::WordSize() {
 }
 
 temp::Temp *X64RegManager::FramePointer() {
-  return GetRegister(11); //%rbp
+  return GetRegister(10); //%rbp
   return nullptr;
 }
 
 temp::Temp *X64RegManager::StackPointer() {
-  return GetRegister(0); //%rsp
+  return GetRegister(15); //%rsp
   return nullptr;
 }
 
 temp::Temp *X64RegManager::ReturnValue() {
-  return GetRegister(1); //%rax
+  return GetRegister(0); //%rax
   return nullptr;
 }
 } // namespace frame
