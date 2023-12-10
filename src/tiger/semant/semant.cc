@@ -189,6 +189,7 @@ type::Ty *RecordExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
     return type::IntTy::Instance();
   }
   else{
+    result = result->ActualTy();
     if(typeid(*result) != typeid(type::RecordTy)){
       errormsg->Error(pos_, std::string("not a record type"));
     }
@@ -196,41 +197,32 @@ type::Ty *RecordExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
       type::RecordTy *rec_ty = static_cast<type::RecordTy *>(result);
       type::FieldList *field_list = rec_ty->fields_;
 
-      const auto &decl_list = field_list->GetList();       
-      const auto &call_list = this->fields_->GetList();
+      auto decl_list = field_list->GetList();
+      auto call_list = this->fields_->GetList();
 
       auto call_iter = call_list.begin();
-      int size = call_list.size();
-      
-      Exp *exp = nullptr;
-      type::Field *field = nullptr;
+      auto decl_iter = decl_list.begin();
 
-      for(; call_iter != call_list.end(); call_iter++){
-        exp = (*call_iter)->exp_;
-        field = nullptr;
-
-        auto decl_iter = decl_list.begin();
-        for(; decl_iter != decl_list.end(); decl_iter++){
-          if ((*decl_iter)->name_ == (*call_iter)->name_) {
-            field = *decl_iter;
-            break;
-          }
-        }
-        if(field == nullptr){
-          errormsg->Error(exp->pos_, "field %s doesn't exist",(*call_iter)->name_->Name().data());
-          return result;
-        }
-        else{
-          type::Ty *ty = exp->SemAnalyze(venv, tenv, labelcount, errormsg);
-          if (!ty->IsSameType(field->ty_)) {
-            errormsg->Error(exp->pos_, "unmatched assign exp");
-          }
-        }
+      if(decl_list.size() == call_list.size()){
+         while(call_iter != call_list.end()){
+            if( (*call_iter)->name_ !=  (*decl_iter)->name_ ||
+               !((*call_iter)
+                     ->exp_->SemAnalyze(venv, tenv, labelcount, errormsg)
+                     ->IsSameType((*decl_iter)->ty_))){
+              errormsg->Error(pos_, "mismatch field name/type");
+              return nullptr;
+            }
+            call_iter++;
+            decl_iter++;
+         }
       }
+      else{
+         errormsg->Error(pos_, "mismatch field num");
+      }
+      return result;
     }
-    return result;
   }
-  
+  return nullptr;
 }
 
 type::Ty *SeqExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
@@ -367,10 +359,7 @@ type::Ty *LetExp::SemAnalyze(env::VEnvPtr venv, env::TEnvPtr tenv,
       dec->SemAnalyze(venv, tenv, labelcount, errormsg);
 
   type::Ty *result;
-  if (!body_) 
-      result = type::VoidTy::Instance();
-  else 
-      result = body_->SemAnalyze(venv, tenv, labelcount, errormsg);
+  result = body_->SemAnalyze(venv, tenv, labelcount, errormsg);
   
   tenv->EndScope();
   venv->EndScope();

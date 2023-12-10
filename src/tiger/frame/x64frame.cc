@@ -3,98 +3,112 @@
 extern frame::RegManager *reg_manager;
 
 namespace frame {
-/* TODO: Put your lab5 code here */
-class InFrameAccess : public Access {
-public:
-  int offset;
-
-  explicit InFrameAccess(int offset) : offset(offset) {}
-  /* TODO: Put your lab5 code here */
-  tree::Exp *ToExp(tree::Exp *framePtr) const override{
-    return nullptr;
+Access* X64Frame::AllocLocal(bool escape) {
+  Access* local = nullptr;
+  if (escape) {
+    this->offset_ -= reg_manager->WordSize();
+    local_num++;
+    local = new InFrameAccess(this->offset_);
+  } else {
+    local = new InRegAccess(temp::TempFactory::NewTemp());
   }
-};
+  return local;
+}
 
+Frame *Frame::NewFrame(temp::Label *name, std::list<bool> formals) {
 
-class InRegAccess : public Access {
-public:
-  temp::Temp *reg;
+  Frame *new_frame = new X64Frame;
+  new_frame->name_ = name;
+  new_frame->formals_ = new std::list<Access *>;
 
-  explicit InRegAccess(temp::Temp *reg) : reg(reg) {}
-  /* TODO: Put your lab5 code here */
-  tree::Exp *ToExp(tree::Exp *framePtr) const override{
-    return new tree::TempExp(reg);
+  int i = 0;
+  bool init = true;
+  temp::TempList *arg_regs = reg_manager->ArgRegs();
+  for (const auto &escape: formals) {
+    if (i >= 6) {
+      new_frame->formals_->push_back(
+          new InFrameAccess((i - 5) * reg_manager->WordSize())
+      );
+    }
+    else {
+      Access *new_access = new_frame->AllocLocal(escape);
+      new_frame->formals_->push_back(new_access);
+
+      auto append_move_stm = new tree::MoveStm(
+          new_access->ToExp(new tree::TempExp(reg_manager->FramePointer())),
+          new tree::TempExp(arg_regs->NthTemp(i)));
+
+      if (init) {
+        new_frame->view_shift_ = append_move_stm;
+        init = false;
+      }
+      else {
+        new_frame->view_shift_ = new tree::SeqStm(
+            new_frame->view_shift_,
+            append_move_stm
+        );
+      }
+    }
+    i++;
   }
-};
 
-class X64Frame : public Frame {
-  /* TODO: Put your lab5 code here */
-};
-/* TODO: Put your lab5 code here */
+  return new_frame;
+}
 
-temp::TempList *X64RegManager::Registers() {
-  auto tmp_list = new temp::TempList();
-  for(int i = 0; i < 15; i++){
-    tmp_list->Append(GetRegister(i));
+tree::Exp *ExternalCall(std::string s, tree::ExpList *args)
+{
+  return new tree::CallExp(
+    new tree::NameExp(temp::LabelFactory::NamedLabel(s)), args
+  );
+}
+
+tree::Stm *ProcEntryExit1(Frame *frame, tree::Stm *stm)
+{
+
+  temp::TempList *callee_regs = reg_manager->CalleeSaves();
+
+  for (temp::Temp *callee_reg : callee_regs->GetList()) {
+    Access *tmp = frame->AllocLocal(false);
+
+    auto save_callee_stm = new tree::MoveStm(
+            tmp->ToExp(new tree::TempExp(reg_manager->FramePointer())),
+            new tree::TempExp(callee_reg));
+    auto restore_callee_stm = new tree::MoveStm(
+            new tree::TempExp(callee_reg),
+            tmp->ToExp(new tree::TempExp(reg_manager->FramePointer())));
+
+    stm = new tree::SeqStm(
+        new tree::SeqStm(save_callee_stm,stm),restore_callee_stm
+    );
   }
-  return tmp_list;
-//  return nullptr;
-}
 
-temp::TempList *X64RegManager::ArgRegs() {
-  auto tmp_list = new temp::TempList();
-  for(int i = 1; i < 7; i++){
-    tmp_list->Append(GetRegister(i));
+  if (frame->view_shift_) {
+    stm = new tree::SeqStm(frame->view_shift_, stm);
   }
-  return tmp_list;
-//  return nullptr;
+
+  return stm;
 }
 
-temp::TempList *X64RegManager::CallerSaves() {
-  auto tmp_list = new temp::TempList();
-  for(int i = 0; i < 9; i++){
-    tmp_list->Append(GetRegister(i));
-  }
-  return tmp_list;
-//  return nullptr;
+assem::InstrList *ProcEntryExit2(assem::InstrList *body)
+{
+  body->Append(new assem::OperInstr("", new temp::TempList(), reg_manager->ReturnSink(), nullptr));
+  return body;
 }
 
-temp::TempList *X64RegManager::CalleeSaves() {
-  auto tmp_list = new temp::TempList();
-  for(int i = 9; i < 15; i++){
-    tmp_list->Append(GetRegister(i));
-  }
-  return tmp_list;
-//  return nullptr;
-}
+assem::Proc *ProcEntryExit3(frame::Frame *frame, assem::InstrList *body)
+{
+  int frame_size = (frame->local_num + frame->max_args) * reg_manager->WordSize();
 
-temp::TempList *X64RegManager::ReturnSink() {
+  std::stringstream prologue;
+  std::stringstream epilogue;
 
-  temp::TempList *tmp_list = CalleeSaves();
+  prologue<<".set "<<temp::LabelFactory::LabelString(frame->name_)<<"_framesize, "<<frame_size<<std::endl;
+  prologue<<temp::LabelFactory::LabelString(frame->name_)<<":" << std::endl;
+  prologue<< "subq $" << frame_size << ", %rsp" << std::endl;
 
-  tmp_list->Append(StackPointer()); //%rsp
-  tmp_list->Append(ReturnValue());  //%rax
-  
-  return tmp_list;
-  return nullptr;
-}
+  epilogue<< "addq $" << frame_size << ", %rsp" << std::endl;
+  epilogue<< "retq" << std::endl;
 
-int X64RegManager::WordSize() {
-  return 8;
-}
-
-temp::Temp *X64RegManager::FramePointer() {
-  return GetRegister(10); //%rbp
-  return nullptr;
-}
-
-temp::Temp *X64RegManager::StackPointer() {
-  return GetRegister(15); //%rsp
-  return nullptr;
-}
-
-temp::Temp *X64RegManager::ReturnValue() {
-  return GetRegister(0); //%rax
-  return nullptr;
+  return new assem::Proc(prologue.str(), body, epilogue.str());
 }
 } // namespace frame
