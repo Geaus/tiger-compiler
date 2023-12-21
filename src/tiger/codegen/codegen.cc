@@ -49,7 +49,7 @@ void LabelStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
 void JumpStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
   /* TODO: Put your lab5 code here */
   auto dst_lab = temp::LabelFactory::LabelString(exp_->name_);
-  auto jmp_instr = new assem::OperInstr("jmp "+ dst_lab, nullptr, nullptr,
+  auto jmp_instr = new assem::OperInstr("jmp "+ dst_lab, new temp::TempList(), new temp::TempList(),
                             new assem::Targets(jumps_));
   instr_list.Append(jmp_instr);
 }
@@ -61,7 +61,7 @@ void CjumpStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
   temp::Temp *right_reg = right_->Munch(instr_list, fs);
 
   instr_list.Append(new assem::OperInstr(
-    "cmpq `s1,`s0", nullptr,
+    "cmpq `s1,`s0", new temp::TempList(),
     new temp::TempList({left_reg, right_reg}),
     nullptr
   ));
@@ -91,7 +91,7 @@ void CjumpStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
   }
   instr_list.Append(new assem::OperInstr(
       cj_instr+temp::LabelFactory::LabelString(true_label_),
-      nullptr, nullptr,
+      new temp::TempList(), new temp::TempList(),
       new assem::Targets(new std::vector<temp::Label *>({
           true_label_, false_label_}))));
 }
@@ -103,7 +103,7 @@ void MoveStm::Munch(assem::InstrList &instr_list, std::string_view fs) {
 
     auto *dst_mem = static_cast<MemExp *>(dst_);
     temp::Temp *dst_reg = dst_mem->exp_->Munch(instr_list, fs);
-    auto mov_instr = new assem::MoveInstr("movq `s0, (`s1)",nullptr,
+    auto mov_instr = new assem::MoveInstr("movq `s0, (`s1)",new temp::TempList(),
                                           new temp::TempList({src_reg, dst_reg}));
     instr_list.Append(mov_instr);
   }
@@ -237,7 +237,7 @@ temp::Temp *NameExp::Munch(assem::InstrList &instr_list, std::string_view fs) {
   /* TODO: Put your lab5 code here */
   temp::Temp *reg = temp::TempFactory::NewTemp();
   auto leaq_instr = new assem::OperInstr("leaq "+temp::LabelFactory::LabelString(name_)+"(%rip),`d0",
-                        new temp::TempList({reg}),nullptr, nullptr);
+                        new temp::TempList({reg}),new temp::TempList(), nullptr);
 
   instr_list.Append(leaq_instr);
   return reg;
@@ -247,7 +247,7 @@ temp::Temp *ConstExp::Munch(assem::InstrList &instr_list, std::string_view fs) {
   /* TODO: Put your lab5 code here */
   temp::Temp *reg = temp::TempFactory::NewTemp();
   auto mov_instr = new assem::OperInstr("movq $"+std::to_string(consti_)+",`d0",
-                       new temp::TempList({reg}),nullptr, nullptr
+                       new temp::TempList({reg}),new temp::TempList(), nullptr
                        );
   instr_list.Append(mov_instr);
   return reg;
