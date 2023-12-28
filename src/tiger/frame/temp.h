@@ -4,6 +4,7 @@
 #include "tiger/symbol/symbol.h"
 
 #include <list>
+#include <set>
 
 namespace temp {
 
@@ -67,6 +68,87 @@ public:
   void Append(Temp *t) { temp_list_.push_back(t); }
   [[nodiscard]] Temp *NthTemp(int i) const;
   [[nodiscard]] const std::list<Temp *> &GetList() const { return temp_list_; }
+  TempList *Temp2Temp(Temp *old_temp, Temp *new_temp) const {
+    auto *res = new TempList();
+    for (Temp *tmp : temp_list_) {
+      if (tmp == old_temp) {
+        res->temp_list_.push_back(new_temp);
+        continue ;
+      }
+      res->temp_list_.push_back(tmp);
+    }
+    return res;
+  }
+  bool Contain(Temp *t) {
+    bool res = false;
+    for(const auto &tmp : temp_list_){
+      if(tmp == t){
+        res = true;
+      }
+    }
+    return res;
+  }
+
+  TempList *Union(TempList *tl){
+    auto res = new TempList();
+    if (tl == nullptr) {
+      for (const auto &temp : temp_list_) {
+        res->Append(temp);
+      }
+
+    }
+    else{
+      for (const auto &temp : temp_list_) {
+        res->Append(temp);
+      }
+      for (const auto &temp : tl->GetList()) {
+        if (!res->Contain(temp)) res->Append(temp);
+      }
+    }
+    return res;
+  }
+  TempList *Difference(TempList *tl){
+    auto res = new TempList();
+    if (tl == nullptr) {
+      for (const auto &temp : temp_list_) {
+        res->Append(temp);
+      }
+    }
+    else{
+      for (const auto &temp : temp_list_) {
+        res->Append(temp);
+      }
+      for (const auto &temp : tl->GetList()) {
+        if (!tl->Contain(temp)) res->Append(temp);
+      }
+    }
+    return res;
+  }
+  bool Equal(TempList *tl){
+
+    std::set<temp::Temp *> this_set;
+    std::set<temp::Temp *> tl_set;
+
+    for (const auto &it : temp_list_){
+      this_set.insert(it);
+    }
+    for (const auto &it : tl->GetList()){
+      tl_set.insert(it);
+    }
+
+    return this_set == tl_set;
+//      res.insert(it);
+//
+//    bool res = true;
+//    if (tl == nullptr) res = false;
+//    for (auto temp : temp_list_) {
+//      if (!tl->Contain(temp)) res = false;
+//    }
+//    for (auto temp : tl->GetList()) {
+//      if (!this->Contain(temp)) res = false;
+//    }
+//    return res;
+  }
 
 private:
   std::list<Temp *> temp_list_;

@@ -2,6 +2,8 @@
 #define TIGER_FRAME_FRAME_H_
 
 #include <list>
+#include <vector>
+#include <sstream>
 #include <memory>
 #include <string>
 
@@ -71,13 +73,28 @@ protected:
 class Access {
 public:
   /* TODO: Put your lab5 code here */
-  
+  Access(){};
   virtual ~Access() = default;
+  virtual tree::Exp *ToExp(tree::Exp *framePtr) const = 0;
   
 };
 
 class Frame {
   /* TODO: Put your lab5 code here */
+public:
+  Frame() {}
+
+  temp::Label *name_;
+  std::list<Access *> *formals_;
+  int offset_ = 0;
+  int local_num = 0;
+  int max_args = 0;
+  tree::Stm *view_shift_ = nullptr;
+
+  virtual Access *AllocLocal(bool escape) = 0;
+  virtual std::string GetLabel() = 0;
+  static Frame *NewFrame(temp::Label *name, std::list<bool> formals);
+
 };
 
 /**
@@ -131,7 +148,10 @@ private:
   std::list<Frag*> frags_;
 };
 
-/* TODO: Put your lab5 code here */
+tree::Exp *ExternalCall(std::string s, tree::ExpList *args);
+tree::Stm *ProcEntryExit1(Frame *frame, tree::Stm *stm);
+assem::InstrList *ProcEntryExit2(assem::InstrList *body);
+assem::Proc *ProcEntryExit3(frame::Frame *frame, assem::InstrList *body);
 
 } // namespace frame
 
