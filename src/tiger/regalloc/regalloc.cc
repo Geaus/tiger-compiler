@@ -6,8 +6,6 @@ extern frame::RegManager *reg_manager;
 
 namespace ra {
 /* TODO: Put your lab6 code here */
-<<<<<<< HEAD
-=======
 
 Result::~Result() {
 }
@@ -690,5 +688,4 @@ void RegAllocator::deleteUselessMoves(){
   assem_instr_ = new_instr_list;
 }
 
->>>>>>> lab6
 } // namespace ra

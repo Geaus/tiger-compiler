@@ -28,8 +28,6 @@ public:
 
 class RegAllocator {
   /* TODO: Put your lab6 code here */
-<<<<<<< HEAD
-=======
 private:
 
   temp::Map *color;
@@ -101,7 +99,6 @@ public:
 
 
 
->>>>>>> lab6
 };
 
 } // namespace ra

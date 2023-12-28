@@ -74,7 +74,6 @@ temp::TempList *MoveInstr::Use() const {
 
 temp::TempList *OperInstr::Use() const {
   /* TODO: Put your lab6 code here */
-<<<<<<< HEAD
-=======
   return src_;
 } // namespace assem
+}
